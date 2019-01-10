@@ -6,8 +6,6 @@ GB\_Unreported
 
 ### Usage
 
-Describe data being used (links), and how to run. Eg:
-
 There are four core scripts that are required for the analysis, they need to be run in order:
 
 -   01\_clean.R
@@ -17,11 +15,7 @@ There are four core scripts that are required for the analysis, they need to be 
 
 #### Example
 
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-## basic example code
-```
+None
 
 ### Project Status
 
@@ -52,3 +46,5 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 ------------------------------------------------------------------------
 
 *This project was created using the [bcgovr](https://github.com/bcgov/bcgovr) package.*
+
+This repository is maintained by [ENVEcosystems](https://github.com/orgs/bcgov/teams/envecosystems/members).

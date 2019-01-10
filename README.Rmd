@@ -20,8 +20,6 @@ If you have bcgovr installed and you use RStudio, click the 'Insert BCDevex Badg
 
 ### Usage
 
-Describe data being used (links), and how to run. Eg:
-
 There are four core scripts that are required for the analysis, they need to be run in order:
 
 - 01_clean.R
@@ -31,11 +29,7 @@ There are four core scripts that are required for the analysis, they need to be 
 
 #### Example
 
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-## basic example code
-```
+None
 
 ### Project Status
 
@@ -67,3 +61,5 @@ See the License for the specific language governing permissions and limitations 
 
 ---
 *This project was created using the [bcgovr](https://github.com/bcgov/bcgovr) package.* 
+
+This repository is maintained by [ENVEcosystems](https://github.com/orgs/bcgov/teams/envecosystems/members).
