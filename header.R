@@ -32,12 +32,12 @@ StrataOutDir <- file.path(dataOutDir,'Strata')
 tileOutDir <- file.path(dataOutDir,'tile')
 figsOutDir <- file.path(OutDir,'figures')
 DataDir <- 'data'
-BearRDataDir <- file.path('../BearRData')
 dir.create(file.path(OutDir), showWarnings = FALSE)
 dir.create(file.path(dataOutDir), showWarnings = FALSE)
 dir.create(file.path(StrataOutDir), showWarnings = FALSE)
 dir.create(file.path(tileOutDir), showWarnings = FALSE)
 dir.create(file.path(figsOutDir), showWarnings = FALSE)
+dir.create(file.path(BearRDataDirOut), showWarnings = FALSE)
 dir.create(DataDir, showWarnings = FALSE)
 dir.create("tmp", showWarnings = FALSE)
 

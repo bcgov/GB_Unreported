@@ -1,12 +1,68 @@
-# Copyright 2019 Province of British Columbia
-# 
+# Copyright 2018 Province of British Columbia
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
+
+# Repo estimates unreported mortality for each GBPU based on:
+# 1. core security (in % by GBPU). Note: replaces previous statistic of % capable within 50km of areas with >5000 people
+# 2. Hunter day density -> HunterDensity repo: https://github.com/bcgov/HunterDensity
+# Note: previously used Large Ungulate harvest replaced by hunter day density above
+# 3. frontcountry (in % by GBPU) - from provincial CE Grizzly protocol. Note: replaces previous statistic of % capable habitat with roads
+
+source("header.R")
+
+#Read in 2004 unreported mortality spreadsheet
+Unreport2004 <- data.frame(read_xlsx(file.path(DataDir, "2004_est_unreportedMort.xlsx"), sheet=NULL))
+colnames(Unreport2004)<-c('GBPU','pcHab_gt5000_win50km','pcHab_gt5000_PropBench','AreaSqKm','HunterDays','HunterDensity_1000km2',
+                          'HuntDens_PorpBenchmark','AreaSqKm_2','UngHarv2000_2002','UngHarvDensity_Ungperyearper1000km2',
+                          'UngDen_PropBenchmark','pcHab_gt0_kmperkm2','pcHab_gt0_PropBenchmark','UnreportedMort_unbound',
+                          'UnreportedMort_bound_0.3_3','GBPU2')
+
+#Read in current female mortality data based compiled by Steve McIver and Provincial Grizzly Bear Technical Team
+#Includes 2018 updated population information
+FemaleMort <- data.frame(read_xlsx(file.path(DataDir, "Female Mort_GBPU_V3.xlsx"), sheet=NULL))
+colnames(FemaleMort)<-c('GBPU','PopEst','5yrReportedFemUnknownMort','AvgAnnReported','HarvProcedureEstUnreportMort',
+                        'EstAnnualTotUnreportMort','EstFemUnreporMort','5yrEstFemaleMort','AvgAnnFemUnknownMort_5yr',
+                        '10yrReportFemUnknownMort','AvgAnnReported','10yrReportedEstFemMort','AvgAnnFemUnknownMort_10yr')
+
+#Load the Info to estimate unreported mortality
+
+# Hunter Density
+# from HunterDensity repo: https://github.com/bcgov/HunterDensity
+HuntDDensR<-raster(file.path(HunterSpatialDir,"HuntDDensR.tif"))
+HuntDDensNonHabR<-raster(file.path(HunterSpatialDir,"HuntDDensNonHabR.tif"))
+
+#Human & Livestock Denisty
+# from HumanLivestock repo: https://github.com/bcgov/HumanLivestockDensity
+HumanDensityR<-raster(file.path(HumanLivestockSpatialDir,"HumanDensityR.tif"))
+LivestockDensityR<-raster(file.path(HumanLivestockSpatialDir,"LSDensityR.tif"))
+
+#GB Security Areas, Human Access and Road Density
+# from GB_Data repo: https://github.com/bcgov/GB_Data
+#Security Areas
+SecureR<-raster(file.path(GBspatialDir,"Securer.tif"))
+
+#Human access
+FrontCountryR<-raster(file.path(GBspatialDir,"FrontCountryr.tif"))
+
+#Road Density
+RdDensR<-raster(file.path(GBspatialDir,"RdDens.tif"))
+
+#Load Strata
+# from GB_Data repo: https://github.com/bcgov/GB_Data
+NonHab<-raster(file.path(StrataDir,"NonHab.tif"))
+GBPUr<-raster(file.path(StrataDir,"GBPUr.tif"))
+GBPUr_NonHab<-raster(file.path(StrataDir,"GBPUr_NonHab.tif"))
+GBPUr_BEI_1_2<-raster(file.path(StrataDir,"GBPUr_BEI_1_2.tif"))
+GBPUr_BEI_1_5<-raster(file.path(StrataDir,"GBPUr_BEI_1_5.tif"))
+
+
+
 
