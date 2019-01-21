@@ -15,15 +15,6 @@ source("header.R")
 StrataL <- c('GBPUr','GBPUr_NonHab','GBPUr_BEI_1_2','GBPUr_BEI_1_5')
 num<-length(StrataL)
 
-#FemaleMort
-
-#GBThreat<-subset(ThreatLZR[[1]], !(GBPU == 'extirpated'))
-
-#GBunreported<-merge(GBThreat,Unreport2004,by='GBPU',all=TRUE)
-# Notes -
-# North Purcells = North Purcells + Spillamacheen
-# Central-South Purcells = South Purcells + Central Purcells
-
 UnreportL<-list()
 
 for (i in 1:num) {
@@ -59,7 +50,7 @@ WriteXLS(UnreportL, file.path(dataOutDir,paste('GBUnreported.xls',sep='')),Sheet
 TestData<-subset(UnreportL[[1]], AreaHa>0)
 TestData[is.na(TestData)] <- 0
 
-pdf(file.path(dataOutDir,"GBMortPlots.pdf"))
+pdf(file.path(figsOutDir,"GBMortPlots.pdf"))
 # Front Country - pcHab_gt5000_win50km2004 - habitat wihin 50km of towns>5000 people
 x=TestData$FrontCountry
 y=TestData$pcHab_gt5000_win50km2004

@@ -25,43 +25,23 @@ library(readxl)
 library(openxlsx)
 library(rgdal)
 library(RColorBrewer)
+library(stringr)
 
 OutDir <- 'out'
 dataOutDir <- file.path(OutDir,'data')
 StrataOutDir <- file.path(dataOutDir,'Strata')
-tileOutDir <- file.path(dataOutDir,'tile')
 figsOutDir <- file.path(OutDir,'figures')
 DataDir <- 'data'
+HunterSpatialDir <- file.path('../HunterDensity/out/spatial')
+HumanLivestockSpatialDir <- file.path('../HumanLivestockDensity/out/spatial')
+StrataDir <- file.path('../GB_Data/out/Strata')
+GBspatialDir <- file.path('../GB_Data/out/spatial')
 dir.create(file.path(OutDir), showWarnings = FALSE)
 dir.create(file.path(dataOutDir), showWarnings = FALSE)
 dir.create(file.path(StrataOutDir), showWarnings = FALSE)
-dir.create(file.path(tileOutDir), showWarnings = FALSE)
 dir.create(file.path(figsOutDir), showWarnings = FALSE)
-dir.create(file.path(BearRDataDirOut), showWarnings = FALSE)
 dir.create(DataDir, showWarnings = FALSE)
 dir.create("tmp", showWarnings = FALSE)
 
-#Required packages
-options(scipen=3)
-require(sp)
-gpclibPermit()
-require(raster)
-require(maptools)
-#require(rgdal)
-require(shapefiles)
-require(gpclib)
-require(RColorBrewer) # creates nice color schemes
-require(e1071) #package needed for classInt
-require(classInt) # finds class intervals for continuous variables
-require(png) # next 3 for pulling in google maps
-require(RJSONIO)
-require(RgoogleMaps)
-require(maps) # for scale bar
-require(rgeos)
-require(GISTools)
-require(Hmisc)
-library(Hmisc)
-require(corrgram)
-require(aod)
 
 

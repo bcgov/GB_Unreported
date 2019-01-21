@@ -19,45 +19,50 @@ num<-length(StrataL)
 UnreportLR<-list()
 for (i in 1:num) {
   StratName<-StrataL[i]
-  UnreportLR[[StratName]]<-read_xls(file.path(dataOutDir,paste('GBUnreported.xls',sep='')), sheet=StratName)
-}
-
-test<-UnreportLR[[1]]
+  # Read in strata sheet and modify so GBPUs consistent with current 55 GBPUs
+  # North Purcells = North Purcells + Spillamacheen
+  # Central-South Purcells = South Purcells + Central Purcells
+  # Drop those records since new has recalculated values based on 55
+  UnrepLR <-
+    read_xls(file.path(dataOutDir,paste('GBUnReported.xls',sep='')), sheet=StratName) %>%
+    filter(!GBPU %in% c('Spillamacheen','South Purcells','Central Purcells'))
 
 # Use the Flathead as the benchmark since there is data for that unit
 # Based on McLellan et al. 2018 use a 1:1 reported to unreproted mortality
 # Evaluate hunter density and inverse road density - ie higher unreported if more hunters and area is remote
 # Normalize the other GBPUs to the benchmark
 # Look at relationship between road density and hunter density
-x=TestData$RoadDensity
-y=TestData$HunterDensity
+x=UnrepLR$RoadDensity
+y=UnrepLR$HunterDensity
 cor(x,y)
 scatter.smooth(x=x, y=y, main="Road Density - Hunter Density", sub=paste('Correlation=',round(cor(x,y),2)))
 linearMod <- lm(x ~ y)  # build linear regression model on full data
 print(linearMod)
 
 # Normalize road denisty and hunter density
-test$norm_hunterD <- round(test$HunterDensity/max(test$HunterDensity,na.rm=TRUE),2)
-test$norm_IroadD <- 1-round(test$RoadDensity/max(test$RoadDensity,na.rm=TRUE),2)
-test$norm_roadD <- round(test$RoadDensity/max(test$RoadDensity,na.rm=TRUE),2)
+UnrepLR$norm_hunterD <- round(UnrepLR$HunterDensity/max(UnrepLR$HunterDensity,na.rm=TRUE),2)
+UnrepLR$norm_IroadD <- 1-round(UnrepLR$RoadDensity/max(UnrepLR$RoadDensity,na.rm=TRUE),2)
+UnrepLR$norm_roadD <- round(UnrepLR$RoadDensity/max(UnrepLR$RoadDensity,na.rm=TRUE),2)
 
 # Select Flathead as benchmark
-bench_hunterD<-test[which(test$GBPU=='Flathead'),]$norm_hunterD
-bench_IroadD<-test[which(test$GBPU=='Flathead'),]$norm_IroadD
-bench_roadD<-test[which(test$GBPU=='Flathead'),]$norm_roadD
+bench_hunterD<-UnrepLR[which(UnrepLR$GBPU=='Flathead'),]$norm_hunterD
+bench_IroadD<-UnrepLR[which(UnrepLR$GBPU=='Flathead'),]$norm_IroadD
+bench_roadD<-UnrepLR[which(UnrepLR$GBPU=='Flathead'),]$norm_roadD
 
 # Combine scores GBPUs by those with highest hunters and highest road density - indexed to Flathead
-test$UnReportWbench<-round(((test$norm_hunterD/bench_hunterD + test$norm_roadD/bench_roadD)/2),2)
+UnrepLR$UnReportWbench<-round(((UnrepLR$norm_hunterD/bench_hunterD + UnrepLR$norm_roadD/bench_roadD)/2),2)
 
 # Combine scores GBPUs by those with highest hunters and lowest road density - indexed to Flathead
-test$UnReportWbencIrdh<-round(((test$norm_hunterD/bench_hunterD + test$norm_IroadD/bench_IroadD)/2),2)
+UnrepLR$UnReportWbencIrdh<-round(((UnrepLR$norm_hunterD/bench_hunterD + UnrepLR$norm_IroadD/bench_IroadD)/2),2)
 
 # Combine scores GBPUs by those with highest hunters and lowest road density - raw
-test$UnReport<-round(((test$norm_hunterD + test$norm_IroadD)/2),2)
+UnrepLR$UnReport<-round(((UnrepLR$norm_hunterD + UnrepLR$norm_IroadD)/2),2)
 
-UnRep<-data.frame(GBPU=test$GBPU,RoadDensity=test$RoadDensity,RoadDNormal=test$norm_roadD,InversRoadDNormal=test$norm_IroadD,HunterDensity=test$HunterDensity,HunterDNormal=test$norm_hunterD,UnReportInvRd=test$UnReportWbencIrdh,UnReport=test$UnReportWbench)
-View(UnRep)
+UnRep<-data.frame(GBPU=UnrepLR$GBPU,RoadDensity=UnrepLR$RoadDensity,RoadDNormal=UnrepLR$norm_roadD,InversRoadDNormal=UnrepLR$norm_IroadD,HunterDensity=UnrepLR$HunterDensity,HunterDNormal=UnrepLR$norm_hunterD,UnReportInvRd=UnrepLR$UnReportWbencIrdh,UnReport=UnrepLR$UnReportWbench)
 
-WriteXLS(UnRep, file.path(dataOutDir,paste('UnReported.xlsx',sep='')))
+UnreportLR[[i]]<-UnRep
+}
+
+WriteXLS(UnreportLR, file.path(dataOutDir,paste('UnReported.xls',sep='')),SheetNames=StrataL)
 
 

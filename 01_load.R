@@ -25,13 +25,6 @@ colnames(Unreport2004)<-c('GBPU','pcHab_gt5000_win50km','pcHab_gt5000_PropBench'
                           'UngDen_PropBenchmark','pcHab_gt0_kmperkm2','pcHab_gt0_PropBenchmark','UnreportedMort_unbound',
                           'UnreportedMort_bound_0.3_3','GBPU2')
 
-#Read in current female mortality data based compiled by Steve McIver and Provincial Grizzly Bear Technical Team
-#Includes 2018 updated population information
-FemaleMort <- data.frame(read_xlsx(file.path(DataDir, "Female Mort_GBPU_V3.xlsx"), sheet=NULL))
-colnames(FemaleMort)<-c('GBPU','PopEst','5yrReportedFemUnknownMort','AvgAnnReported','HarvProcedureEstUnreportMort',
-                        'EstAnnualTotUnreportMort','EstFemUnreporMort','5yrEstFemaleMort','AvgAnnFemUnknownMort_5yr',
-                        '10yrReportFemUnknownMort','AvgAnnReported','10yrReportedEstFemMort','AvgAnnFemUnknownMort_10yr')
-
 #Load the Info to estimate unreported mortality
 
 # Hunter Density
