@@ -58,6 +58,6 @@ test$UnReport<-round(((test$norm_hunterD + test$norm_IroadD)/2),2)
 UnRep<-data.frame(GBPU=test$GBPU,RoadDensity=test$RoadDensity,RoadDNormal=test$norm_roadD,InversRoadDNormal=test$norm_IroadD,HunterDensity=test$HunterDensity,HunterDNormal=test$norm_hunterD,UnReportInvRd=test$UnReportWbencIrdh,UnReport=test$UnReportWbench)
 View(UnRep)
 
-WriteXLS(UnRep, file.path(dataOutDir,paste('UnRep.xlsx',sep='')))
+WriteXLS(UnRep, file.path(dataOutDir,paste('UnReported.xlsx',sep='')))
 
 
