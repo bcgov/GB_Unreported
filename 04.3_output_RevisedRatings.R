@@ -39,30 +39,126 @@ scatter.smooth(x=x, y=y, main="Road Density - Hunter Density", sub=paste('Correl
 linearMod <- lm(x ~ y)  # build linear regression model on full data
 print(linearMod)
 
-# Normalize road denisty and hunter density
+# Normalize road denisty, hunter density, and GBDensity
 UnrepLR$norm_hunterD <- round(UnrepLR$HunterDensity/max(UnrepLR$HunterDensity,na.rm=TRUE),2)
-UnrepLR$norm_IroadD <- 1-round(UnrepLR$RoadDensity/max(UnrepLR$RoadDensity,na.rm=TRUE),2)
+UnrepLR$norm_GBD <- round(UnrepLR$GBDensity/max(UnrepLR$GBDensity,na.rm=TRUE),2)
 UnrepLR$norm_roadD <- round(UnrepLR$RoadDensity/max(UnrepLR$RoadDensity,na.rm=TRUE),2)
+
+# transform 'GB Density' to weibull for a better fit - see below
+#fit.weibull <- fitdist(UnrepLR$norm_GBD, "weibull")
+#UnrepLR$norm_GBD<-pweibull( UnrepLR$norm_GBD, fit.weibull[1]$estimate['shape'], scale=fit.weibull[1]$estimate['scale'] )
 
 # Select Flathead as benchmark
 bench_hunterD<-UnrepLR[which(UnrepLR$GBPU=='Flathead'),]$norm_hunterD
-bench_IroadD<-UnrepLR[which(UnrepLR$GBPU=='Flathead'),]$norm_IroadD
+bench_GBD<-UnrepLR[which(UnrepLR$GBPU=='Flathead'),]$norm_GBD
 bench_roadD<-UnrepLR[which(UnrepLR$GBPU=='Flathead'),]$norm_roadD
 
 # Combine scores GBPUs by those with highest hunters and highest road density - indexed to Flathead
-UnrepLR$UnReportWbench<-round(((UnrepLR$norm_hunterD/bench_hunterD + UnrepLR$norm_roadD/bench_roadD)/2),2)
+UnrepLR$UnReportWbench<-round(((UnrepLR$norm_hunterD/bench_hunterD +
+                                UnrepLR$norm_roadD/bench_roadD) *
+                                UnrepLR$norm_GBD/bench_GBD/2*7.5),2)
 
-# Combine scores GBPUs by those with highest hunters and lowest road density - indexed to Flathead
-UnrepLR$UnReportWbencIrdh<-round(((UnrepLR$norm_hunterD/bench_hunterD + UnrepLR$norm_IroadD/bench_IroadD)/2),2)
-
-# Combine scores GBPUs by those with highest hunters and lowest road density - raw
-UnrepLR$UnReport<-round(((UnrepLR$norm_hunterD + UnrepLR$norm_IroadD)/2),2)
-
-UnRep<-data.frame(GBPU=UnrepLR$GBPU,RoadDensity=UnrepLR$RoadDensity,RoadDNormal=UnrepLR$norm_roadD,InversRoadDNormal=UnrepLR$norm_IroadD,HunterDensity=UnrepLR$HunterDensity,HunterDNormal=UnrepLR$norm_hunterD,UnReportInvRd=UnrepLR$UnReportWbencIrdh,UnReport=UnrepLR$UnReportWbench)
+UnRep<-data.frame(GBPU=UnrepLR$GBPU,
+                  RoadDensity=UnrepLR$RoadDensity,RoadDNormal=UnrepLR$norm_roadD,
+                  GBDensity=UnrepLR$GBDensity,GBDNormal=UnrepLR$norm_GBD,
+                  HunterDensity=UnrepLR$HunterDensity,HunterDNormal=UnrepLR$norm_hunterD,
+                  UnReport=UnrepLR$UnReportWbench)
 
 UnreportLR[[i]]<-UnRep
 }
 
 WriteXLS(UnreportLR, file.path(dataOutDir,paste('UnReported.xls',sep='')),SheetNames=StrataL)
+
+#Make a pretty table for GBPU
+df<-UnreportLR[[1]] %>%
+  dplyr::select(GBPU,GBDensity,RoadDensity,HunterDensity,UnReport)
+colnames(df)<-c('GBPU','GB Density','Road Density','Hunter Density','Unreported Ratio')
+
+library("htmltools")
+library("webshot")
+
+export_formattable <- function(f, file, width = "100%", height = NULL,
+                               background = "white", delay = 0.2)
+{
+  w <- as.htmlwidget(f, width = width, height = height)
+  path <- html_print(w, background = background, viewer = NULL)
+  url <- paste0("file:///", gsub("\\\\", "/", normalizePath(path)))
+  webshot(url,
+          file = file,
+          selector = ".formattable_widget",
+          delay = delay)
+}
+#(source: https://github.com/renkun-ken/formattable/issues/26)
+
+DT<-formattable(df, list(
+  GBPU = color_tile("white", "orange"),
+  formattable::area(col = c('Road Density')) ~ normalize_bar("pink", 0.06),
+  formattable::area(col = c('Hunter Density')) ~ normalize_bar("lightblue", 0.1),
+  formattable::area(col = c('GB Density')) ~ normalize_bar("lightgreen", 0.1),
+  'Unreported Ratio' = formatter("span", style = x ~
+   ifelse(x < 2 ,style(color = "green", font.weight = "bold"), style(color = "red",
+  font.weight = "bold")))
+))
+
+#webshot::install_phantomjs()
+export_formattable(DT,file.path(figsOutDir,"GBUNreportedTable.png"))
+
+FT <- formattable(DF, list(
+  Name=formatter("span",
+                 style = x ~ ifelse(x == "Technology", style(font.weight = "bold"), NA)),
+  Value = color_tile("white", "orange"),
+  Change = formatter("span",
+                     style = x ~ style(color = ifelse(x < 0 , "red", "green")),
+                     x ~ icontext(ifelse(x < 0, "arrow-down", "arrow-up"), x))) )
+
+
+#pdf(file.path(figsOutDir,"GBMortPlots.pdf"))
+
+#dev.off()
+
+#Check the distribution of the gb density data to see if better to transform
+x<-df$`GB Density`
+descdist(x, discrete = FALSE)
+
+fit.weibull <- fitdist(x, "weibull")
+fit.norm <- fitdist(x, "norm")
+plot(fit.norm)
+plot(fit.weibull)
+
+fit.weibull$aic
+fit.norm$aic
+
+y <- pweibull( x, 1.623121, scale=21.983232 )
+
+
+----------
+n.sims <- 5e4
+
+# From https://stats.stackexchange.com/a/126552/21054
+stats <- replicate(n.sims, {
+  r <- rweibull(n = length(x)
+                , shape= fit.weibull$estimate["shape"]
+                , scale = fit.weibull$estimate["scale"]
+  )
+  estfit.weibull <- fitdist(r, "weibull") # added to account for the estimated parameters
+  as.numeric(ks.test(r
+                     , "pweibull"
+                     , shape= estfit.weibull$estimate["shape"]
+                     , scale = estfit.weibull$estimate["scale"])$statistic
+  )
+})
+
+plot(ecdf(stats), las = 1, main = "KS-test statistic simulation (CDF)", col = "darkorange", lwd = 1.7)
+grid()
+
+fit <- logspline(stats)
+
+1 - plogspline(ks.test(x
+                       , "pweibull"
+                       , shape= fit.weibull$estimate["shape"]
+                       , scale = fit.weibull$estimate["scale"])$statistic
+               , fit
+)
+
 
 

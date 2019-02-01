@@ -47,5 +47,4 @@ rsconnect/
   /tmp*/
   *qgs*
   *doc*
-
-
+tmp/

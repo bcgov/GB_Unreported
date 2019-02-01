@@ -22,7 +22,8 @@ for (i in 1:num) {
   UnreportLR[[StratName]]<-read_xls(file.path(dataOutDir,paste('GBUnreported.xls',sep='')), sheet=StratName)
 }
 
-test<-UnreportLR[[1]]
+#Use the GBPU strata that has non habitat removed
+test<-UnreportLR[['GBPUr_NonHab']]
 
 # On inspection looks like the Flathead is being used as a benchmark
 Bench_pcHab_gt5000<-test[which(test$GBPU=='Flathead'),]$pcHab_gt5000_win50km2004

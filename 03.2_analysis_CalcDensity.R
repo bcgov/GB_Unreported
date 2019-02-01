@@ -20,26 +20,35 @@
 
 source("header.R")
 
-Threat_file <- file.path("tmp/ThreatBrick")
-ThreatBrick <- readRDS(file = Threat_file)
-
-StrataL <- c('GBPUr','GBPUr_NonHab','GBPUr_BEI_1_2','GBPUr_BEI_1_5')
-GBPU_lut<-readRDS(file.path(StrataDir,'GBPU_lut'))
+#First calculate the area of each GBPU for full GBPU and GBPU with habitat removed
+StrataL <- c('GBPUr','GBPUr_NonHab')
+GBPUrF<-list()
 
 num<-length(StrataL)
-i<-1
+
 for (i in 1:num) {
-  # Originally strata was in a brick, but freq and zonal had memory issues
   GBStrata<-raster(file.path(StrataDir,paste(StrataL[i], ".tif", sep="")))
-
-  ThreatZoneF<-freq(GBStrata, parellel=FALSE)
-  colnames(ThreatZoneF)<-c('GRIZZLY_BEAR_POP_UNIT_ID','Area')
-  ThreatGBPU<-merge(GBPU_lut,ThreatZoneF,by='GRIZZLY_BEAR_POP_UNIT_ID')
-
-  ThreatZ1<-zonal(ThreatBrick,GBStrata,'sum', na.rm=TRUE)
-
-  ThreatZone<-merge(ThreatGBPU,ThreatZ1,by.x='GRIZZLY_BEAR_POP_UNIT_ID',by.y='zone')
-
-  saveRDS(ThreatZone, file = (file.path(dataOutDir,StrataL[i])))
+  Freqs<-data.frame(freq(GBStrata, parellel=FALSE))
+  colnames(Freqs)<-c('GBPUid','AreaHa')
+  GBPUrF[[i]]<-Freqs
 }
+
+#Combine GBPU LUT to get ids in population database
+gb2018pop<-merge(GBPU_lut,gb2018popIN, by='GBPU')
+
+ComboArea<-
+  merge(GBPUrF[[1]],GBPUrF[[2]], by='GBPUid') %>%
+  dplyr::select(GBPUid,AreaHa=AreaHa.x,AreaHaNonHab=AreaHa.y)
+
+gbDensity<-
+  merge(ComboArea,gb2018pop,by='GBPUid') %>%
+  mutate(DensityGBPU = round(pop2018/AreaHa*100000,2)) %>%
+  mutate(DensityGBPUnonHab = round(pop2018/AreaHaNonHab*100000,2))
+
+WriteXLS(gbDensity, file.path(dataOutDir,paste('gbDensity.xls',sep='')))
+
+gbDensitySmall<-data.frame(GBPU=gbDensity$GBPU,pop2018=gbDensity$pop2018,GBDensity=gbDensity$DensityGBPU)
+#GBPop_NonHab<-subs(GBPUr_NonHab,gb2018pop, by='GBPUid',which='pop2018')
+
+
 

@@ -30,7 +30,6 @@ colnames(Unreport2004)<-c('GBPU','pcHab_gt5000_win50km','pcHab_gt5000_PropBench'
 # Hunter Density
 # from HunterDensity repo: https://github.com/bcgov/HunterDensity
 HuntDDensR<-raster(file.path(HunterSpatialDir,"HuntDDensR.tif"))
-HuntDDensNonHabR<-raster(file.path(HunterSpatialDir,"HuntDDensNonHabR.tif"))
 
 #Human & Livestock Denisty
 # from HumanLivestock repo: https://github.com/bcgov/HumanLivestockDensity
@@ -46,7 +45,7 @@ SecureR<-raster(file.path(GBspatialDir,"Securer.tif"))
 FrontCountryR<-raster(file.path(GBspatialDir,"FrontCountryr.tif"))
 
 #Road Density
-RdDensR<-raster(file.path(GBspatialDir,"RdDens.tif"))
+RdDensR<-raster(file.path(Rdkmkm2Dir,"Roadkmkm2Raw.tif"))
 
 #Load Strata
 # from GB_Data repo: https://github.com/bcgov/GB_Data
@@ -55,6 +54,18 @@ GBPUr<-raster(file.path(StrataDir,"GBPUr.tif"))
 GBPUr_NonHab<-raster(file.path(StrataDir,"GBPUr_NonHab.tif"))
 GBPUr_BEI_1_2<-raster(file.path(StrataDir,"GBPUr_BEI_1_2.tif"))
 GBPUr_BEI_1_5<-raster(file.path(StrataDir,"GBPUr_BEI_1_5.tif"))
+
+
+# read the gbpu LUT to get ids so density file can be merged
+GBPU_lut<-readRDS(file = file.path(StrataDir,'GBPU_lut'))
+colnames(GBPU_lut)<-c('GBPUid','GBPU')
+
+#read in updated 2018 population numbers
+gb2018popIN <- data.frame(read_xlsx(file.path(DataDir, "population/GB2018pop.xlsx"), sheet=NULL))
+
+
+
+
 
 
 

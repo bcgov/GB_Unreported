@@ -42,7 +42,7 @@ for (i in 1:num) {
 
   # Density indicators expressed as km/km2 in Strata
   GBlistDK<-ThreatZone[ , (names(ThreatZone) %in% KmDensity)]
-  GBDK<-data.frame(lapply(GBlistDK, function(x) round((x)/GBlistDK$Area/10,4)))#metres of rds/ha (metre/ha)/10 to translate to km/km2
+  GBDK<-data.frame(lapply(GBlistDK, function(x) round((x)/GBlistDK$Area,4)))#km of rds/km2
 
   ThreatZ<-
     cbind(data.frame(ThreatZone[ , (names(ThreatZone) %in% Strata)], AreaHa,GBA, GBD, GBDK)) %>%
@@ -58,11 +58,17 @@ for (i in 1:num) {
 #For each strata pull out the relevant attributes and build an ordered data frame for inspection
 
 #For each strata pull out the relevant attributes and build an ordered data frame for inspection
+#Add in density from entire GBPU
+gbDensity<-data.frame(read_xls(file.path(dataOutDir,'gbDensity.xls'), sheet=NULL))
+gbDensitySmall<-data.frame(GBPU=gbDensity$GBPU,pop2018=gbDensity$pop2018,GBDensity=gbDensity$DensityGBPU)
+
+
 ThreatLZR<-list()
 
 for (i in 1:num) {
          StratName<-StrataL[i]
-         ThreatLZR[[StratName]]<-data.frame(GBPU=ThreatL[[StrataL[i]]]$POPULATION_NAME,
+         ThreatLZR[[StratName]]<-
+           data.frame(GBPU=ThreatL[[StrataL[i]]]$POPULATION_NAME,
                                             AreaHa=ThreatL[[StrataL[i]]]$Area,
                                             SecureHabitat=ThreatL[[StrataL[i]]]$SecureHabitat,
                                             FrontCountry=ThreatL[[StrataL[i]]]$FrontCountry,
@@ -70,7 +76,8 @@ for (i in 1:num) {
                                             LivestockDensity=ThreatL[[StrataL[i]]]$LivestockDensity,
                                             HunterDensity=ThreatL[[StrataL[i]]]$HunterDensity,
                                             RoadDensity=ThreatL[[StrataL[i]]]$RoadDensity
-         )
+         ) %>%
+         merge(gbDensitySmall, by='GBPU')
 }
 # write out the list of threat strata data frames to a multi-tab excel spreadsheet
 WriteXLS(ThreatLZR, file.path(dataOutDir,paste('GBThreats.xls',sep='')),SheetNames=StrataL)

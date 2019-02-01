@@ -23,6 +23,8 @@ for (i in 1:num) {
   StratName<-StrataL[i]
   UnreportL[[StratName]]<-data.frame(GBPU=GBunreported$GBPU,
                             AreaHa=GBunreported$AreaHa,
+                            pop2018=GBunreported$pop2018,
+                            GBDensity=GBunreported$GBDensity,
                             UnreportedMort_unbound2004=GBunreported$UnreportedMort_unbound,
                             RoadDensity=round(GBunreported$RoadDensity,2),
                             UnSecureHabitat=100-round(GBunreported$SecureHabitat,0),
@@ -39,7 +41,6 @@ for (i in 1:num) {
                             HuntDens_PorpBenchmark=GBunreported$HuntDens_PorpBenchmark,
                             UngHarvDensity_Ungperyearper1000km2_2004=GBunreported$UngHarvDensity_Ungperyearper1000km2,
                             UngDen_PropBenchmark=GBunreported$UngDen_PropBenchmark
-
 )
 }
 
@@ -76,4 +77,21 @@ cor(x,y)
 scatter.smooth(x=x, y=y, main="HunterDensity 2017 - HunterDenstiy 2004", sub=paste('Correlation=',round(cor(x,y),2)))
 linearMod <- lm(x ~ y)  # build linear regression model on full data
 print(linearMod)
+
+x=TestData$pcHab_gt5000_win50km2004
+y=TestData$pcHab_gt0_kmperkm2
+
+cor(x,y)
+scatter.smooth(x=x, y=y, main="pcHab_gt5000_win50km2004 - pcHab_gt0_kmperkm2", sub=paste('Correlation=',round(cor(x,y),2)))
+linearMod <- lm(x ~ y)  # build linear regression model on full data
+print(linearMod)
+
+x=TestData$UngHarvDensity_Ungperyearper1000km2_200
+y=TestData$HunterDensity2004
+
+cor(x,y)
+scatter.smooth(x=x, y=y, main="UngHarvDensity_Ungperyearper1000km2_200 - HunterDenstiy 2004", sub=paste('Correlation=',round(cor(x,y),2)))
+linearMod <- lm(x ~ y)  # build linear regression model on full data
+print(linearMod)
+
 dev.off()
