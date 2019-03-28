@@ -18,13 +18,6 @@
 
 source("header.R")
 
-#Read in 2004 unreported mortality spreadsheet
-Unreport2004 <- data.frame(read_xlsx(file.path(DataDir, "2004_est_unreportedMort.xlsx"), sheet=NULL))
-colnames(Unreport2004)<-c('GBPU','pcHab_gt5000_win50km','pcHab_gt5000_PropBench','AreaSqKm','HunterDays','HunterDensity_1000km2',
-                          'HuntDens_PorpBenchmark','AreaSqKm_2','UngHarv2000_2002','UngHarvDensity_Ungperyearper1000km2',
-                          'UngDen_PropBenchmark','pcHab_gt0_kmperkm2','pcHab_gt0_PropBenchmark','UnreportedMort_unbound',
-                          'UnreportedMort_bound_0.3_3','GBPU2')
-
 #Load the Info to estimate unreported mortality
 
 # Hunter Density
