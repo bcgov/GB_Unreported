@@ -37,6 +37,7 @@ HunterSpatialDir <- file.path('../HunterDensity/out/spatial')
 HumanLivestockSpatialDir <- file.path('../HumanLivestockDensity/out/spatial')
 StrataDir <- file.path('../GB_Data/out/Strata')
 GBspatialDir <- file.path('../GB_Data/out/spatial')
+GBDataDir <- file.path('../GB_Data/data')
 Rdkmkm2Dir <- file.path('../bc-raster-roads/out')
 
 dir.create(file.path(OutDir), showWarnings = FALSE)

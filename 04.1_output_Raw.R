@@ -15,83 +15,33 @@ source("header.R")
 StrataL <- c('GBPUr','GBPUr_NonHab','GBPUr_BEI_1_2','GBPUr_BEI_1_5')
 num<-length(StrataL)
 
+#Read in xls file with multiple worksheets - one for each strata - created in 03.3_analysis_integrate.R
+path <- file.path(dataOutDir, paste('GBThreats.xls',sep=''))
+
+ThreatLZR <- path %>%
+  excel_sheets() %>%
+  set_names() %>%
+  map(read_excel, path = path)
+
 UnreportL<-list()
 
 for (i in 1:num) {
   GBThreat<-subset(ThreatLZR[[i]], !(GBPU == 'extirpated'))
-  GBunreported<-merge(GBThreat,Unreport2004,by='GBPU',all=TRUE)
+  GBunreported<-GBThreat
   StratName<-StrataL[i]
   UnreportL[[StratName]]<-data.frame(GBPU=GBunreported$GBPU,
                             AreaHa=GBunreported$AreaHa,
                             pop2018=GBunreported$pop2018,
                             GBDensity=GBunreported$GBDensity,
-                            UnreportedMort_unbound2004=GBunreported$UnreportedMort_unbound,
                             RoadDensity=round(GBunreported$RoadDensity,2),
                             UnSecureHabitat=100-round(GBunreported$SecureHabitat,0),
                             SecureHabitat=round(GBunreported$SecureHabitat,0),
                             FrontCountry=round(GBunreported$FrontCountry/100,2), # change percent to between 0 and 1
-                            pcHab_gt5000_win50km2004=GBunreported$pcHab_gt5000_win50km,
-                            pcHab_gt5000_PropBench=GBunreported$pcHab_gt5000_PropBench,
-                            pcHab_gt0_kmperkm2=GBunreported$pcHab_gt0_kmperkm2,
-                            pcHab_gt0_PropBenchmark=GBunreported$pcHab_gt0_PropBenchmark,
                             HumanDensity=round(GBunreported$HumanDensity*1000,0), #report per 1000km2
                             LivestockDensity=round(GBunreported$LivestockDensity*1000,0), #report per 1000km2
-                            HunterDensity=round(GBunreported$HunterDensity*1000,0), #report per 1000km2
-                            HunterDensity2004=GBunreported$HunterDensity_1000km2,
-                            HuntDens_PorpBenchmark=GBunreported$HuntDens_PorpBenchmark,
-                            UngHarvDensity_Ungperyearper1000km2_2004=GBunreported$UngHarvDensity_Ungperyearper1000km2,
-                            UngDen_PropBenchmark=GBunreported$UngDen_PropBenchmark
+                            HunterDensity=round(GBunreported$HunterDensity*1000,0) #report per 1000km2
 )
 }
 
 WriteXLS(UnreportL, file.path(dataOutDir,paste('GBUnreported.xls',sep='')),SheetNames=StrataL)
 
-#plot(UnreportL[[1]]$FrontCountry,UnreportL[[1]]$pcHab_gt5000_win50km2004,type='p')
-
-TestData<-subset(UnreportL[[1]], AreaHa>0)
-TestData[is.na(TestData)] <- 0
-
-pdf(file.path(figsOutDir,"GBMortPlots.pdf"))
-# Front Country - pcHab_gt5000_win50km2004 - habitat wihin 50km of towns>5000 people
-x=TestData$FrontCountry
-y=TestData$pcHab_gt5000_win50km2004
-
-cor(x,y)
-scatter.smooth(x=x, y=y, main="Front Country - pcHabgt5000", sub=paste('Correlation=',round(cor(x,y),2)))
-linearMod <- lm(x ~ y)  # build linear regression model on full data
-print(linearMod)
-
-# Unsecure Habitat - pcHab_gt0_kmperkm2 - habitat wihtin areas >0 road density
-x=TestData$UnSecureHabitat
-y=TestData$pcHab_gt0_kmperkm2
-
-cor(x,y)
-scatter.smooth(x=x, y=y, main="Unsecure Habitat - pcHab_gt0_kmperkm2", sub=paste('Correlation=',round(cor(x,y),2)))
-linearMod <- lm(x ~ y)  # build linear regression model on full data
-print(linearMod)
-
-x=TestData$HunterDensity
-y=TestData$HunterDensity2004
-
-cor(x,y)
-scatter.smooth(x=x, y=y, main="HunterDensity 2017 - HunterDenstiy 2004", sub=paste('Correlation=',round(cor(x,y),2)))
-linearMod <- lm(x ~ y)  # build linear regression model on full data
-print(linearMod)
-
-x=TestData$pcHab_gt5000_win50km2004
-y=TestData$pcHab_gt0_kmperkm2
-
-cor(x,y)
-scatter.smooth(x=x, y=y, main="pcHab_gt5000_win50km2004 - pcHab_gt0_kmperkm2", sub=paste('Correlation=',round(cor(x,y),2)))
-linearMod <- lm(x ~ y)  # build linear regression model on full data
-print(linearMod)
-
-x=TestData$UngHarvDensity_Ungperyearper1000km2_200
-y=TestData$HunterDensity2004
-
-cor(x,y)
-scatter.smooth(x=x, y=y, main="UngHarvDensity_Ungperyearper1000km2_200 - HunterDenstiy 2004", sub=paste('Correlation=',round(cor(x,y),2)))
-linearMod <- lm(x ~ y)  # build linear regression model on full data
-print(linearMod)
-
-dev.off()

@@ -18,11 +18,4 @@ names(ThreatBrick) <- c('HumanDensity','LivestockDensity','HunterDensity','Secur
 Threat_file <- file.path("tmp/ThreatBrick")
 saveRDS(ThreatBrick, file = Threat_file)
 
-#Clean up GBPU names in Unreport2004 data base
-Unreport2004$GBPU<-gsub("\\s+(?=\\p{Pd})|(?<=\\p{Pd})\\s+", "", (str_to_title(Unreport2004$GBPU)), perl=TRUE)
-#Change values read in as % to standard
-Unreport2004$UnreportedMort_unbound<-Unreport2004$UnreportedMort_unbound*100
-Unreport2004$UnreportedMort_bound_0.3_3<-Unreport2004$UnreportedMort_bound_0.3_3*100
-
-
 

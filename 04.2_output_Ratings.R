@@ -57,35 +57,4 @@ Check<-data.frame(test$GBPU,test$UnreportedMort_unbound,test$UnreportedMort_unbo
 View(Check)
 
 
-TestData<-subset(test, AreaHa>0)
-TestData[is.na(TestData)] <- 0
-
-x=TestData$UnreportedMort_unbound
-y=TestData$UnreportedMort_unbound2004
-
-x=TestData$HuntDens_PorpBenchmark
-y=TestData$Porp_HunterDensity
-
-x=TestData$pcHab_gt5000_PropBench
-y=TestData$UnSecureHabitat
-
-x=TestData$pcHab_gt0_PropBenchmark
-y=TestData$Porp_FrontCountry
-
-x=TestData$UngHarvDensity_Ungperyearper1000km2_2004
-y=TestData$HunterDensity2004
-
-
-#pdf(file.path(dataOutDir,"GBMortPlots.pdf"))
-
-cor(x,y)
-
-scatter.smooth(x=x, y=y, main="2019 - 2004", sub=paste('Correlation=',round(cor(x,y),2)))
-linearMod <- lm(x ~ y)  # build linear regression model on full data
-print(linearMod)
-
-#dev.off()
-
-#Evaluate using only hunter density and backcountry - areas with high hunters and more backcountry have higher rates?
-# Benchmark against the Flathead? where
 
