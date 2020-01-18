@@ -13,7 +13,7 @@
 source("header.R")
 
 #Make a Threat brick for analysis
-ThreatBrick <- stack(HumanDensityR,LivestockDensityR,HuntDDensR,SecureR,FrontCountryR,RdDensR)
+ThreatBrick <- stack(HumanDensityR,LivestockDensityR,HuntDDensNonHabR,SecureR,FrontCountryR,RdDensR)
 names(ThreatBrick) <- c('HumanDensity','LivestockDensity','HunterDensity','SecureHabitat','FrontCountry','RoadDensity')
 Threat_file <- file.path("tmp/ThreatBrick")
 saveRDS(ThreatBrick, file = Threat_file)

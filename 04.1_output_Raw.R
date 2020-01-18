@@ -12,8 +12,10 @@
 
 source("header.R")
 
-StrataL <- c('GBPUr','GBPUr_NonHab','GBPUr_BEI_1_2','GBPUr_BEI_1_5')
-num<-length(StrataL)
+GBPU_StrataL <- c('GBPUr','GBPUr_NonHab')
+WMU_StrataL <- c('GB_WMU_id','GB_WMU_id_NonHab')
+numGBPU<-length(GBPU_StrataL)
+numWMU<-length(WMU_StrataL)
 
 #Read in xls file with multiple worksheets - one for each strata - created in 03.3_analysis_integrate.R
 path <- file.path(dataOutDir, paste('GBThreats.xls',sep=''))
@@ -25,23 +27,48 @@ ThreatLZR <- path %>%
 
 UnreportL<-list()
 
-for (i in 1:num) {
+#For GBPUs
+for (i in 1:numGBPU) {
   GBThreat<-subset(ThreatLZR[[i]], !(GBPU == 'extirpated'))
   GBunreported<-GBThreat
   StratName<-StrataL[i]
   UnreportL[[StratName]]<-data.frame(GBPU=GBunreported$GBPU,
-                            AreaHa=GBunreported$AreaHa,
-                            pop2018=GBunreported$pop2018,
-                            GBDensity=GBunreported$GBDensity,
-                            RoadDensity=round(GBunreported$RoadDensity,2),
-                            UnSecureHabitat=100-round(GBunreported$SecureHabitat,0),
-                            SecureHabitat=round(GBunreported$SecureHabitat,0),
-                            FrontCountry=round(GBunreported$FrontCountry/100,2), # change percent to between 0 and 1
-                            HumanDensity=round(GBunreported$HumanDensity*1000,0), #report per 1000km2
-                            LivestockDensity=round(GBunreported$LivestockDensity*1000,0), #report per 1000km2
-                            HunterDensity=round(GBunreported$HunterDensity*1000,0) #report per 1000km2
-)
+                                     AreaHa=GBunreported$AreaHa,
+                                     EST_POP_2018=GBunreported$EST_POP_2018,
+                                     #GBDensity=GBunreported$GBDensity,
+                                     GBDensity=GBunreported$DensityGBPUnonHab,
+                                     RoadDensity=round(GBunreported$RoadDensity,2),
+                                     UnSecureHabitat=100-round(GBunreported$SecureHabitat,0),
+                                     SecureHabitat=round(GBunreported$SecureHabitat,0),
+                                     FrontCountry=round(GBunreported$FrontCountry/100,2), # change percent to between 0 and 1
+                                     HumanDensity=round(GBunreported$HumanDensity*1000,0), #report per 1000km2
+                                     LivestockDensity=round(GBunreported$LivestockDensity*1000,0), #report per 1000km2
+                                     HunterDensity=round(GBunreported$HunterDensity*1000,0) #report per 1000km2
+  )
 }
 
+#For WMUs
+start<-numGBPU+1
+end<-numGBPU+numWMU
+for (i in start:end) {
+  GBThreat<-subset(ThreatLZR[[i]])
+  GBunreported<-GBThreat
+  StratName<-StrataL[i]
+  UnreportL[[StratName]]<-data.frame(WMUid=GBunreported$id,
+                                     MU=GBunreported$MU,
+                                     LEH=GBunreported$LEH,
+                                     AreaHa=GBunreported$AreaHa,
+                                     EST_POP_2018=GBunreported$EST_POP_2018,
+                                     #GBDensity=GBunreported$GBDensity,
+                                     GBDensity=GBunreported$DensityWMUnonHab,
+                                     RoadDensity=round(GBunreported$RoadDensity,2),
+                                     UnSecureHabitat=100-round(GBunreported$SecureHabitat,0),
+                                     SecureHabitat=round(GBunreported$SecureHabitat,0),
+                                     FrontCountry=round(GBunreported$FrontCountry/100,2), # change percent to between 0 and 1
+                                     HumanDensity=round(GBunreported$HumanDensity*1000,0), #report per 1000km2
+                                     LivestockDensity=round(GBunreported$LivestockDensity*1000,0), #report per 1000km2
+                                     HunterDensity=round(GBunreported$HunterDensity*1000,0) #report per 1000km2
+  )
+}
 WriteXLS(UnreportL, file.path(dataOutDir,paste('GBUnreported.xls',sep='')),SheetNames=StrataL)
 

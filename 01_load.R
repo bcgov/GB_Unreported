@@ -20,11 +20,13 @@ source("header.R")
 
 #Load the Info to estimate unreported mortality
 
-# Hunter Density
+# Hunter Density - for MU - rock, ice included
 # from HunterDensity repo: https://github.com/bcgov/HunterDensity
 HuntDDensR<-raster(file.path(HunterSpatialDir,"HuntDDensR.tif"))
+# Hunter Density - for MU - rock, ice not included
+HuntDDensNonHabR<-raster(file.path(HunterSpatialDir,"HuntDDensNonHabR.tif"))
 
-#Human & Livestock Denisty
+#Human & Livestock Denisty - for entire census area - rock, ice included
 # from HumanLivestock repo: https://github.com/bcgov/HumanLivestockDensity
 HumanDensityR<-raster(file.path(HumanLivestockSpatialDir,"HumanDensityR.tif"))
 LivestockDensityR<-raster(file.path(HumanLivestockSpatialDir,"LSDensityR.tif"))
@@ -34,10 +36,10 @@ LivestockDensityR<-raster(file.path(HumanLivestockSpatialDir,"LSDensityR.tif"))
 #Security Areas
 SecureR<-raster(file.path(GBspatialDir,"Securer.tif"))
 
-#Human access
+#Human access- raw raster of classes
 FrontCountryR<-raster(file.path(GBspatialDir,"FrontCountryr.tif"))
 
-#Road Density
+#Road Density - ras raster of classes
 RdDensR<-raster(file.path(Rdkmkm2Dir,"Roadkmkm2Raw.tif"))
 
 #Load Strata
@@ -45,16 +47,24 @@ RdDensR<-raster(file.path(Rdkmkm2Dir,"Roadkmkm2Raw.tif"))
 NonHab<-raster(file.path(StrataDir,"NonHab.tif"))
 GBPUr<-raster(file.path(StrataDir,"GBPUr.tif"))
 GBPUr_NonHab<-raster(file.path(StrataDir,"GBPUr_NonHab.tif"))
-GBPUr_BEI_1_2<-raster(file.path(StrataDir,"GBPUr_BEI_1_2.tif"))
-GBPUr_BEI_1_5<-raster(file.path(StrataDir,"GBPUr_BEI_1_5.tif"))
-
+GB_WMU_id<-raster(file.path(StrataDir,"GB_WMU_id.tif"))
+GB_WMU_id_NonHab<-raster(file.path(StrataDir,"GB_WMU_id_NonHab.tif"))
 
 # read the gbpu LUT to get ids so density file can be merged
 GBPU_lut<-readRDS(file = file.path(StrataDir,'GBPU_lut'))
 colnames(GBPU_lut)<-c('GBPUid','GBPU')
 
-#read in updated 2018 population numbers
-gb2018popIN <- data.frame(read_xlsx(file.path(GBDataDir, "population/GB2018pop.xlsx"), sheet=NULL))
+#read in updated 2018 population numbers by GBPU
+#gb2018GBPUpopIN <- data.frame(read_xls(file.path(GBDataOutDir, "gb2018GBPUpop.xls"), sheet=NULL))
+#read in revised populations with gb density already calculated
+gb2018GBPUpopIN <- data.frame(read_xls(file.path(GBDataOutDir, "GBPUpop.xls"), sheet=NULL))
+
+#BY WMU
+#gb2018WMUpopIN <- data.frame(read_xls(file.path(GBDataOutDir, "gb2018WMUpop.xls"), sheet=NULL))
+#read in revised populations with assigned gb density
+gb2018WMUpopIN <- data.frame(read_xls(file.path(GBDataOutDir, "WMUpop.xls"), sheet=NULL))
+
+
 
 
 

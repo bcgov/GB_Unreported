@@ -17,8 +17,9 @@ IndsPCArea<-c("Area","SecureHabitat","FrontCountry")
 IndsDensity<-c("Area","HumanDensity","LivestockDensity","HunterDensity")
 KmDensity<-c("Area","RoadDensity")
 
-Strata<-c('GRIZZLY_BEAR_POP_UNIT_ID','POPULATION_NAME')
-StrataL <- c('GBPUr','GBPUr_NonHab','GBPUr_BEI_1_2','GBPUr_BEI_1_5')
+Strata<-c('GRIZZLY_BEAR_POP_UNIT_ID','GBPU_MU_LEH_uniqueID')
+StrataL <- c('GBPUr','GBPUr_NonHab','GB_WMU_id','GB_WMU_id_NonHab')
+
 ThreatL<-list()
 num<-length(StrataL)
 
@@ -45,7 +46,7 @@ for (i in 1:num) {
   GBDK<-data.frame(lapply(GBlistDK, function(x) round((x)/GBlistDK$Area,4)))#km of rds/km2
 
   ThreatZ<-
-    cbind(data.frame(ThreatZone[ , (names(ThreatZone) %in% Strata)], AreaHa,GBA, GBD, GBDK)) %>%
+    cbind(data.frame(id=ThreatZone[ , (names(ThreatZone) %in% Strata)], AreaHa,GBA, GBD, GBDK)) %>%
     dplyr::select(-Area, -Area.1,-Area.2)
 
   #Save individual Strata
@@ -59,16 +60,31 @@ for (i in 1:num) {
 
 #For each strata pull out the relevant attributes and build an ordered data frame for inspection
 #Add in density from entire GBPU
-gbDensity<-data.frame(read_xls(file.path(dataOutDir,'gbDensity.xls'), sheet=NULL))
-gbDensitySmall<-data.frame(GBPU=gbDensity$GBPU,pop2018=gbDensity$pop2018,GBDensity=gbDensity$DensityGBPU)
+gbGBPUDensity<-data.frame(read_xls(file.path(dataOutDir,'gbGBPUDensity.xls'), sheet=NULL))
+gbGBPUDensitySmall<-data.frame(GBPUid=gbGBPUDensity$GBPUid,
+                               GBPU=gbGBPUDensity$POPULATION_NAME,
+                               #EST_POP_2018=gbGBPUDensity$EST_POP_2018,
+                               EST_POP_2018=gbGBPUDensity$pop2018,
+                               GBDensity=gbGBPUDensity$Density,
+                               DensityGBPUnonHab=gbGBPUDensity$Density_noWaterIce)
+                               #GBDensity=gbGBPUDensity$DensityGBPU,
+                               #DensityGBPUnonHab=gbGBPUDensity$DensityGBPUnonHab)
 
+#and for WMU
+gbWMUDensity<-data.frame(read_xls(file.path(dataOutDir,'gbWMUDensity.xls'), sheet=NULL))
+gbWMUDensitySmall<-data.frame(WMUid=gbWMUDensity$GBPU_MU_LEH_uniqueID,
+                              MU=gbWMUDensity$MU,
+                              LEH=gbWMUDensity$LEH_Zone2_fix,
+                              EST_POP_2018=gbWMUDensity$EST_POP_DENSITY_2018, #note density is calculated only on noWaterIce
+                              GBDensity=gbWMUDensity$EST_POP_DENSITY_2018,
+                              DensityWMUnonHab=gbWMUDensity$Density_noWaterIce)
 
 ThreatLZR<-list()
 
 for (i in 1:num) {
          StratName<-StrataL[i]
          ThreatLZR[[StratName]]<-
-           data.frame(GBPU=ThreatL[[StrataL[i]]]$POPULATION_NAME,
+           data.frame(id=ThreatL[[StrataL[i]]]$id,
                                             AreaHa=ThreatL[[StrataL[i]]]$Area,
                                             SecureHabitat=ThreatL[[StrataL[i]]]$SecureHabitat,
                                             FrontCountry=ThreatL[[StrataL[i]]]$FrontCountry,
@@ -76,8 +92,15 @@ for (i in 1:num) {
                                             LivestockDensity=ThreatL[[StrataL[i]]]$LivestockDensity,
                                             HunterDensity=ThreatL[[StrataL[i]]]$HunterDensity,
                                             RoadDensity=ThreatL[[StrataL[i]]]$RoadDensity
-         ) %>%
-         merge(gbDensitySmall, by='GBPU')
+         )
+
+         ThreatLZR[[StratName]]<-
+           if (grepl('WMU',StrataL[i])) {
+              merge(ThreatLZR[[StratName]],gbWMUDensitySmall, by.x='id',by.y='WMUid')
+            } else {
+              merge(ThreatLZR[[StratName]],gbGBPUDensitySmall, by.x='id',by.y='GBPUid')
+            }
+
 }
 # write out the list of threat strata data frames to a multi-tab excel spreadsheet
 WriteXLS(ThreatLZR, file.path(dataOutDir,paste('GBThreats.xls',sep='')),SheetNames=StrataL)
